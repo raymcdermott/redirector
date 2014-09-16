@@ -5,6 +5,7 @@
             [ring.adapter.jetty :as jetty]
             [monger.core :as mg]
             [monger.collection :as mc]
+            [clojure.java.io :as io]
             [taoensso.carmine :as car :refer (wcar)]
             [environ.core :refer [env]]))
 
@@ -12,8 +13,8 @@
 ;
 ; read data from Mongo ... source of truth
 
-(def mongo-url (or "mongo:localhost:9600" (env :MONGO_URL)))
-(def mongo-collection (or "nmsc-cache-domains" (env :MONGO_COLLECTION)))
+(def mongo-url (or "mongodb://localhost" (env :MONGO_URL)))
+(def mongo-collection (or "redirections" (env :MONGO_COLLECTION)))
 
 (defn mongo-action
   "Run a data function on MongoDB wrapped by a connect / disconnect"
@@ -31,12 +32,12 @@
      (mg/disconnect conn)
      result)))
 
-(defn get-configuration-from-mongo [country]
+(defn get-configuration-from-mongo [brand country]
   "Obtain the redirect configuration data from MongoDB for country"
-  (let [country-cache-domain (mongo-action mc/find-one-as-map {"domain.country" country})]
-    (if (nil? country-cache-domain)
+  (let [redirection-data (mongo-action mc/find-one-as-map {:brand brand, :country country} [:domain :bucket])]
+    (if (nil? redirection-data)
       (throw (Exception. (str "Failed, cannot find cache domain for : " country)))
-      country-cache-domain)))
+      (str (:domain redirection-data) "/" (:bucket redirection-data)))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
@@ -66,9 +67,16 @@
 ; if no data, 404
 ; if exception 500
 
+(defn get-route
+  ([country]
+   (country "TOYOTA"))
+  ([brand country]
+   (get-configuration-from-mongo brand country)))
+
 (defn respond [country resource]
   {:status 200
-   :body   (str "hello to " country " wanting " resource "\n")})
+   :body   (get-route country)})
+
 
 
 ; -------*** EXPOSE TO THE WEB
