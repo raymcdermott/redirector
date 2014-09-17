@@ -14,8 +14,8 @@
 ;
 ; read data from Mongo ... source of truth
 
-(def mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test" ))
-(def mongo-collection (or (env :MONGO_COLLECTION) "redirections" ))
+(def mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test"))
+(def mongo-collection (or (env :MONGO_COLLECTION) "redirections"))
 
 (defn mongo-query [data fields]
   (let [{:keys [conn db]} (mg/connect-via-uri mongo-uri)
@@ -26,18 +26,20 @@
 (defn get-route-from-mongo [brand country]
   "Obtain the redirect configuration data from MongoDB for brand / country"
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
-    (if (nil? domain)
-      (throw RuntimeException)
-      (str domain "/" bucket))))
+    (if (and domain bucket)
+      (str domain "/" bucket)
+      (throw RuntimeException))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
 ; read data from REDIS ... source of speed
 
 (defn get-redis-spec []
-  (if (nil? (env :REDIS_URL))
-    {:host "127.0.0.1" :port 6379}
-    {:uri (env :REDIS_URL)}))
+  (if-let [uri (env :REDIS_URL)]
+    (prn (str uri)
+         {:uri uri})
+    (prn "using default"
+         {:host "127.0.0.1" :port 6379})))
 
 (def redis-conn {:pool {} :spec (get-redis-spec)})
 (defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
