@@ -13,5 +13,6 @@
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]
   :main "redirector.web"
+  :aot :all
   :uberjar-name "redirector-standalone.jar"
   :profiles {:production {:env {:production true}}})
