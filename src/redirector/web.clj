@@ -27,7 +27,7 @@
   "Obtain the redirect configuration data from MongoDB for brand / country"
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
     (if (nil? domain)
-      (throw (Exception. (str "Failed, cannot find cache domain for : " country)))
+      (throw RuntimeException)
       (str domain "/" bucket))))
 
 ; -------*** REDIS HELPERS ... push out to another file
@@ -58,8 +58,6 @@
 ;
 ; get data from REDIS or get data from Mongo
 ;
-; if data OK return 301 with new URL from the domain cache
-; if exception 500
 
 (defn get-route [brand country]
   (if-let [cached-route (get-route-from-cache (str brand country))]
@@ -69,7 +67,11 @@
       route)))
 
 (defn respond [brand country resource]
-  (str (get-route brand country) "/" resource))
+  (try
+    (let [url (str (get-route brand country) "/" resource)]
+      (response/redirect url))
+    (catch Exception e
+      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))))
 
 
 ; -------*** EXPOSE TO THE WEB
@@ -77,9 +79,9 @@
 
 (defroutes app
            (GET "/:brand/:country/*" [brand country *]
-                (time (response/redirect (respond brand country *))))
+                (time (respond brand country *)))
            (ANY "*" []
-                (route/not-found "That URL cannot be found")))
+                (route/not-found "That URL is not supported so cannot be found")))
 
 
 ; -------*** START WEB SERVER
