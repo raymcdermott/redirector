@@ -14,8 +14,8 @@
 ;
 ; read data from Mongo ... source of truth
 
-(def mongo-uri (or "mongodb://localhost/test" (env :MONGO_URL)))
-(def mongo-collection (or "redirections" (env :MONGO_COLLECTION)))
+(def mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test" ))
+(def mongo-collection (or (env :MONGO_COLLECTION) "redirections" ))
 
 (defn mongo-query [data fields]
   (let [{:keys [conn db]} (mg/connect-via-uri mongo-uri)
@@ -70,7 +70,7 @@
   (try
     (let [url (str (get-route brand country) "/" resource)]
       (response/redirect url))
-    (catch Exception e
+    (catch Exception 
       (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))))
 
 
@@ -83,12 +83,29 @@
            (ANY "*" []
                 (route/not-found "That URL is not supported so cannot be found")))
 
+; Until the cardb devs get their act together ... put some records in the collection
+
+(defn seed_mongo []
+  (let [{:keys [conn db]} (mg/connect-via-uri mongo-uri)]
+    (mc/drop-indexes db mongo-collection)
+    (mc/save db mongo-collection {:brand "LEXUS" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "LEXUS" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "LEXUS" :country "ES" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "LEXUS" :country "UK" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "TOYOTA" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "TOYOTA" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "TOYOTA" :country "ES" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/save db mongo-collection {:brand "TOYOTA" :country "UK" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
+    (mc/ensure-index db mongo-collection {:brand 1, :country 1}, {:unique true})
+    (mg/disconnect conn)))
+
 
 ; -------*** START WEB SERVER
 ;
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
+    (if (env :SEED_MONGO) (seed_mongo))
     (jetty/run-jetty (site #'app) {:port port :join? false})))
 
 ;; For interactive development:
