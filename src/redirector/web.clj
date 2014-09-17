@@ -71,7 +71,7 @@
     (let [url (str (get-route brand country) "/" resource)]
       (response/redirect url))
     (catch Exception e
-      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))))
+      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country " exception: " e)))))
 
 
 ; -------*** EXPOSE TO THE WEB
