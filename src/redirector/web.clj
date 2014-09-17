@@ -34,8 +34,12 @@
 ;
 ; read data from REDIS ... source of speed
 
-;(def redis-url (or "127.0.0.1" (env :REDIS_URL))) ; TBC
-(def redis-conn {:pool {} :spec {:host "127.0.0.1" :port 6379}})
+(defn get-redis-spec []
+  (if (nil? (env :REDIS_URL))
+    {:host "127.0.0.1" :port 6379}
+    {:uri (env :REDIS_URL)}))
+
+(def redis-conn {:pool {} :spec (get-redis-spec)})
 (defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
 
 ; set a default of 30 seconds for data expiry in the REDIS cache
