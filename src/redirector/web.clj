@@ -28,21 +28,15 @@
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
     (if (and domain bucket)
       (str domain "/" bucket)
-      (throw RuntimeException))))
+      (throw (Exception. (str "Failed, cannot find cache domain for brand: " brand " and country: " country))))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
 ; read data from REDIS ... source of speed
 
-(defn get-redis-spec []
-  (if-let [uri (env :REDIS_URL)]
-    ((prn (str uri))
-     {:uri uri})
-    ((prn (str "using default ... uri is not set"))
-     {:host "127.0.0.1" :port 6379})))
-
-(def redis-conn {:pool {} :spec (get-redis-spec)})
-(defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
+(defn get-redis-conn [] {:pool {} :spec (if-let [uri (env :REDIS_URL)]
+                                          {:uri uri}
+                                          {:host "127.0.0.1" :port 6379})})
 
 ; set a default of 30 seconds for data expiry in the REDIS cache
 (def redis-ttl (or (env :REDIS_TTL_SECONDS) 30))
@@ -51,10 +45,11 @@
   ([k v]
    (set-route-in-cache! k v redis-ttl))
   ([k v ttl]
-   (wcar* (car/setex k ttl v))))
+   (car/wcar (get-redis-conn) (car/setex k ttl v))))
 
 (defn get-route-from-cache [k]
-  (wcar* (car/get k)))
+  (if-let [value (car/wcar (get-redis-conn) (car/get k))]
+    value))
 
 ; -------*** WORK
 ;
