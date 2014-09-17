@@ -36,10 +36,10 @@
 
 (defn get-redis-spec []
   (if-let [uri (env :REDIS_URL)]
-    (prn (str uri)
-         {:uri uri})
-    (prn "using default"
-         {:host "127.0.0.1" :port 6379})))
+    ((prn (str uri))
+     {:uri uri})
+    ((prn (str "using default ... uri is " uri))
+     {:host "127.0.0.1" :port 6379})))
 
 (def redis-conn {:pool {} :spec (get-redis-spec)})
 (defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
