@@ -66,7 +66,6 @@
     cached-route
     (let [route (get-route-from-mongo brand country)]
       (set-route-in-cache! (str brand country) route)
-      (prn "not cached, obtained from mongo")
       route)))
 
 (defn respond [brand country resource]
@@ -80,7 +79,7 @@
            (GET "/:brand/:country/*" [brand country *]
                 (time (response/redirect (respond brand country *))))
            (ANY "*" []
-                (route/not-found (slurp (io/resource "404.html")))))
+                (route/not-found "That URL cannot be found")))
 
 
 ; -------*** START WEB SERVER
