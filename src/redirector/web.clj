@@ -43,7 +43,7 @@
 ; read data from REDIS ... source of speed
 
 (defn get-redis-conn []
-  (prn (str "REDIS_URL = " (System/getenv "REDIS_URL"))))
+  (prn (str "REDIS_URL = " (System/getenv "REDIS_URL")))
   (let [spec {:pool {} :spec (if-let [uri (System/getenv "REDIS_URL")]
                                {:uri uri}
                                {:host "127.0.0.1" :port 6379})}]
@@ -99,8 +99,8 @@
 
 (defn seed_mongo []
   (let [mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test")
-         {:keys [conn db]} (mg/connect-via-uri mongo-uri)
-         mongo-collection (or (env :MONGO_COLLECTION) "redirections")]
+        {:keys [conn db]} (mg/connect-via-uri mongo-uri)
+        mongo-collection (or (env :MONGO_COLLECTION) "redirections")]
     (mc/drop-indexes db mongo-collection)
     (mc/save db mongo-collection {:brand "LEXUS" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
     (mc/save db mongo-collection {:brand "LEXUS" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
