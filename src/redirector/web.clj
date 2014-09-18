@@ -56,7 +56,8 @@
   ([k v]
    (set-route-in-cache! k v redis-ttl))
   ([k v ttl]
-   (car/wcar (get-redis-conn) (car/setex k ttl v))))
+   (car/wcar (get-redis-conn) (car/setex k ttl v))
+   (prn "key " k " set in cache for " ttl " seconds")))
 
 (defn get-route-from-cache [k]
   (if-let [value (car/wcar (get-redis-conn) (car/get k))]
@@ -96,7 +97,9 @@
 ; Until the cardb devs get their act together ... put some records in the collection
 
 (defn seed_mongo []
-  (let [{:keys [conn db]} (mg/connect-via-uri mongo-uri)]
+  (let [mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test")
+         {:keys [conn db]} (mg/connect-via-uri mongo-uri)
+         mongo-collection (or (env :MONGO_COLLECTION) "redirections")]
     (mc/drop-indexes db mongo-collection)
     (mc/save db mongo-collection {:brand "LEXUS" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
     (mc/save db mongo-collection {:brand "LEXUS" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
