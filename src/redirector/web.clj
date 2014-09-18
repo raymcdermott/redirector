@@ -119,7 +119,7 @@
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
-    (if (env :SEED_MONGO) (seed_mongo))
+    (if (System/getenv "SEED_MONGO") (seed_mongo))
     (jetty/run-jetty (site #'app) {:port port :join? false})))
 
 ;; For interactive development:
