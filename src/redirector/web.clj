@@ -100,7 +100,7 @@
 (defn seed_mongo []
   (let [mongo-uri (or (System/getenv "MONGO_URL") "mongodb://localhost/test")
         {:keys [conn db]} (mg/connect-via-uri mongo-uri)
-        mongo-collection (or (env :MONGO_COLLECTION) "redirections")]
+        mongo-collection (or (System/getenv "MONGO_COLLECTION") "redirections")]
     (mc/drop-indexes db mongo-collection)
     (mc/save db mongo-collection {:brand "LEXUS" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
     (mc/save db mongo-collection {:brand "LEXUS" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
