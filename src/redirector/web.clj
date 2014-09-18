@@ -75,7 +75,7 @@
 
 (defn respond [brand country resource]
   (try
-    (let [url (str (get-route brand country) "/" resource)]
+    (let [url (str (get-route brand country) "/" brand "/" country "/" resource)]
       (response/redirect url))
     (catch Exception e
       (trace/print-stack-trace e)
