@@ -19,7 +19,7 @@
 (defn mongo-connect []
   (prn str "MONGO_URL =  " (System/getenv "MONGO_URL"))
   (let [mongo-uri (or (System/getenv "MONGO_URL") "mongodb://localhost/test")
-        {:keys [conn db]} (mg/connect-via-uri mongo-uri)]
+        {:keys [conn db]} (mg/connect-via-uri "mongodb://heroku_app29676675:2195q9r3m7t8jeik8ae9arv66f@ds063769.mongolab.com:63769/heroku_app29676675")]
     (prn str "mongo-uri =  " mongo-uri)
     (if (and conn db)
       [conn db])))
