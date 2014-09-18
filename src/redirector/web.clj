@@ -6,6 +6,7 @@
             [ring.adapter.jetty :as jetty]
             [monger.core :as mg]
             [monger.collection :as mc]
+            [clojure.stacktrace :as trace]
             [clojure.java.io :as io]
             [taoensso.carmine :as car :refer (wcar)]
             [environ.core :refer [env]]))
@@ -34,9 +35,12 @@
 ;
 ; read data from REDIS ... source of speed
 
-(defn get-redis-conn [] {:pool {} :spec (if-let [uri (env :REDIS_URL)]
-                                          {:uri uri}
-                                          {:host "127.0.0.1" :port 6379})})
+(defn get-redis-conn []
+  (prn (str "REDIS_URL = " (System/getenv "REDIS_URL")))
+  (let [spec {:pool {} :spec (if-let [uri (System/getenv "REDIS_URL")]
+                               {:uri uri}
+                               {:host "127.0.0.1" :port 6379})}]
+    spec))
 
 ; set a default of 30 seconds for data expiry in the REDIS cache
 (def redis-ttl (or (env :REDIS_TTL_SECONDS) 30))
@@ -69,6 +73,7 @@
     (let [url (str (get-route brand country) "/" resource)]
       (response/redirect url))
     (catch Exception e
+      (trace/print-stack-trace e)
       (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country " exception: " e)))))
 
 
