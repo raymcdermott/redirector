@@ -15,11 +15,18 @@
 ;
 ; read data from Mongo ... source of truth
 
-(def mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test"))
-(def mongo-collection (or (env :MONGO_COLLECTION) "redirections"))
+
+(defn mongo-connect []
+  (prn str "MONGO_URL =  " (env :MONGO_URL))
+  (let [mongo-uri (or (env :MONGO_URL) "mongodb://localhost/test")
+        {:keys [conn db]} (mg/connect-via-uri mongo-uri)]
+    (prn str "mongo-uri =  " mongo-uri)
+    (if (and conn db)
+      [conn db])))
 
 (defn mongo-query [data fields]
-  (let [{:keys [conn db]} (mg/connect-via-uri mongo-uri)
+  (let [[conn db] (mongo-connect)
+        mongo-collection (or (env :MONGO_COLLECTION) "redirections")
         result (mc/find-one-as-map db mongo-collection data fields)]
     (mg/disconnect conn)
     result))
@@ -36,8 +43,8 @@
 ; read data from REDIS ... source of speed
 
 (defn get-redis-conn []
-  (prn (str "REDIS_URL = " (System/getenv "REDIS_URL")))
-  (let [spec {:pool {} :spec (if-let [uri (System/getenv "REDIS_URL")]
+  (prn (str "REDIS_URL = " (env :REDIS_URL)))
+  (let [spec {:pool {} :spec (if-let [uri (env :REDIS_URL)]
                                {:uri uri}
                                {:host "127.0.0.1" :port 6379})}]
     spec))
