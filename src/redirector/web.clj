@@ -8,24 +8,23 @@
             [monger.collection :as mc]
             [clojure.stacktrace :as trace]
             [clojure.java.io :as io]
-            [taoensso.carmine :as car :refer (wcar)]
-            [environ.core :refer [env]]))
+            [environ.core :refer env]
+            [taoensso.carmine :as redis :refer (wcar)]))
 
 ; -------*** MONGO HELPERS ... push out to another file
 ;
 ; read data from Mongo ... source of truth
 
-
 (defn mongo-connect []
-  (let [mongo-uri (or (System/getenv "MONGO_URL") "mongodb://localhost/test")
+  (let [mongo-uri (or (env :mongo-url) "mongodb://localhost/test")
         {:keys [conn db]} (mg/connect-via-uri mongo-uri)]
     (if (and conn db)
       [conn db])))
 
-(defn mongo-query [data fields]
+(defn mongo-query [query fields]
   (let [[conn db] (mongo-connect)
-        mongo-collection (or (env :MONGO_COLLECTION) "redirections")
-        result (mc/find-one-as-map db mongo-collection data fields)]
+        mongo-collection (or (env :mongo-collection) "redirections")
+        result (mc/find-one-as-map db mongo-collection query fields)]
     (mg/disconnect conn)
     result))
 
@@ -40,24 +39,24 @@
 ;
 ; read data from REDIS ... source of speed
 
-(defn get-redis-conn []
-  (let [spec {:pool {} :spec (if-let [uri (System/getenv "REDIS_URL")]
+(defn get-redis-connection-pool []
+  (let [spec {:pool {} :spec (if-let [uri (env :redis-url)]
                                {:uri uri}
                                {:host "127.0.0.1" :port 6379})}]
     spec))
 
 ; set a default of 30 seconds for data expiry in the REDIS cache
-(def redis-ttl (or (env :REDIS_TTL_SECONDS) 30))
+(def redis-ttl (or (env :redis-ttl-seconds) 30))
 
 (defn set-route-in-cache!
   ([k v]
    (set-route-in-cache! k v redis-ttl))
   ([k v ttl]
-   (car/wcar (get-redis-conn) (car/setex k ttl v))
+   (redis/wcar (get-redis-connection-pool) (redis/setex k ttl v))
    (prn "key " k " set in cache for " ttl " seconds")))
 
 (defn get-route-from-cache [k]
-  (if-let [value (car/wcar (get-redis-conn) (car/get k))]
+  (if-let [value (redis/wcar (get-redis-connection-pool) (redis/get k))]
     value))
 
 ; -------*** WORK
@@ -69,14 +68,15 @@
 (defn get-route [brand country]
   (if-let [cached-route (get-route-from-cache (str brand country))]
     cached-route
-    (let [route (get-route-from-mongo brand country)]
+    (if-let [route (get-route-from-mongo brand country)]
       (set-route-in-cache! (str brand country) route)
       route)))
 
 (defn respond [brand country resource]
   (try
-    (let [url (str (get-route brand country) "/" brand "/" country "/" resource)]
-      (response/redirect url))
+    (if-let [url (str (get-route brand country) "/" brand "/" country "/" resource)]
+      (response/redirect url)
+      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))
     (catch Exception e
       (trace/print-stack-trace e)
       (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country " exception: " e)))))
@@ -94,9 +94,9 @@
 ; Until the cardb devs get their act together ... put some records in the collection
 
 (defn seed_mongo []
-  (let [mongo-uri (or (System/getenv "MONGO_URL") "mongodb://localhost/test")
+  (let [mongo-uri (or (env :mongo-url) "mongodb://localhost/test")
         {:keys [conn db]} (mg/connect-via-uri mongo-uri)
-        mongo-collection (or (System/getenv "MONGO_COLLECTION") "redirections")]
+        mongo-collection (or (env :mongo-collection) "redirections")]
     (mc/drop-indexes db mongo-collection)
     (mc/save db mongo-collection {:brand "LEXUS" :country "IT" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
     (mc/save db mongo-collection {:brand "LEXUS" :country "FR" :domain "https://s3-eu-west-1.amazonaws.com" :bucket "cache-1"})
@@ -115,7 +115,7 @@
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
-    (if (System/getenv "SEED_MONGO") (seed_mongo))
+    (if (env :seed-mongo) (seed_mongo))
     (jetty/run-jetty (site #'app) {:port port :join? false})))
 
 ;; For interactive development:
