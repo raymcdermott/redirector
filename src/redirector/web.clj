@@ -69,15 +69,13 @@
   (if-let [cached-route (get-route-from-cache (str brand country))]
     cached-route
     (let [route (get-route-from-mongo brand country)]
-      (if-not (nil? route)
-        ((set-route-in-cache! (str brand country) route)
-         (prn (str "mongo route " route))
-         route)))))
+      (set-route-in-cache! (str brand country) route)
+      route)))
 
 (defn respond [brand country resource]
   (if-let [cache-domain (get-route brand country)]
-      (response/redirect (str cache-domain "/" brand "/" country "/" resource))
-      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country))))
+    (response/redirect (str cache-domain "/" brand "/" country "/" resource))
+    (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country))))
 
 
 ; -------*** EXPOSE TO THE WEB
