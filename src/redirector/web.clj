@@ -75,8 +75,8 @@
 
 (defn respond [brand country resource]
   (try
-    (if-let [url (str (get-route brand country) "/" brand "/" country "/" resource)]
-      (response/redirect url)
+    (if-let [cache-domain (get-route brand country)]
+      (response/redirect (str cache-domain "/" brand "/" country "/" resource))
       (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))
     (catch Exception e
       (trace/print-stack-trace e)
