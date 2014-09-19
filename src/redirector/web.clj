@@ -15,25 +15,18 @@
 ;
 ; read data from Mongo ... source of truth
 
-(defn mongo-connect []
-  (let [mongo-uri (or (env :mongo-url) "mongodb://localhost/test")
-        {:keys [conn db]} (mg/connect-via-uri mongo-uri)]
-    (if (and conn db)
-      [conn db])))
-
 (defn mongo-query [query fields]
-  (let [[conn db] (mongo-connect)
+  (let [mongo-uri (or (env :mongo-url) "mongodb://localhost/test")
+        {:keys [conn db]} (mg/connect-via-uri mongo-uri)
         mongo-collection (or (env :mongo-collection) "redirections")
         result (mc/find-one-as-map db mongo-collection query fields)]
     (mg/disconnect conn)
     result))
 
 (defn get-route-from-mongo [brand country]
-  "Obtain the redirect configuration data from MongoDB for brand / country"
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
     (if (and domain bucket)
-      (str domain "/" bucket)
-      (comment throw (Exception. (str "Failed, cannot find cache domain for brand: " brand " and country: " country))))))
+      (str domain "/" bucket))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
@@ -53,8 +46,7 @@
    (set-route-in-cache! k v redis-ttl))
   ([k v ttl]
    (if (and k v ttl)
-     (redis/wcar (get-redis-connection-pool) (redis/setex k ttl v))
-     (prn (str "key " k " for value " v " set in cache for " ttl " seconds")))))
+     (redis/wcar (get-redis-connection-pool) (redis/setex k ttl v)))))
 
 (defn get-route-from-cache [k]
   (if-let [value (redis/wcar (get-redis-connection-pool) (redis/get k))]
@@ -86,7 +78,7 @@
            (GET "/:brand/:country/*" [brand country *]
                 (time (respond brand country *)))
            (ANY "*" []
-                (route/not-found "That URL is not supported so cannot be found")))
+                (route/not-found "You must use a REST style to specify brand and country keys in the URL")))
 
 ; Until the cardb devs get their act together ... put some records in the collection
 
