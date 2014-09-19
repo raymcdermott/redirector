@@ -70,9 +70,9 @@
     cached-route
     (let [route (get-route-from-mongo brand country)]
       (if-not (nil? route)
-        (prn (str "mongo route " route))
-        (set-route-in-cache! (str brand country) route)
-        route))))
+        ((prn (str "mongo route " route))
+         (set-route-in-cache! (str brand country) route)
+         route)))))
 
 (defn respond [brand country resource]
   (try
