@@ -8,7 +8,7 @@
             [monger.collection :as mc]
             [clojure.stacktrace :as trace]
             [clojure.java.io :as io]
-            [environ.core :refer env]
+            [environ.core :refer [env]]
             [taoensso.carmine :as redis :refer (wcar)]))
 
 ; -------*** MONGO HELPERS ... push out to another file
@@ -68,9 +68,10 @@
 (defn get-route [brand country]
   (if-let [cached-route (get-route-from-cache (str brand country))]
     cached-route
-    (if-let [route (get-route-from-mongo brand country)]
-      (set-route-in-cache! (str brand country) route)
-      route)))
+    (let [route (get-route-from-mongo brand country)]
+      (if-not (nil? route)
+        (set-route-in-cache! (str brand country) route)
+        route))))
 
 (defn respond [brand country resource]
   (try
