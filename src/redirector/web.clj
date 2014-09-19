@@ -53,7 +53,7 @@
    (set-route-in-cache! k v redis-ttl))
   ([k v ttl]
    (redis/wcar (get-redis-connection-pool) (redis/setex k ttl v))
-   (prn "key " k " set in cache for " ttl " seconds")))
+   (prn "key " k " for value " v " set in cache for " ttl " seconds")))
 
 (defn get-route-from-cache [k]
   (if-let [value (redis/wcar (get-redis-connection-pool) (redis/get k))]
