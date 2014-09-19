@@ -33,7 +33,7 @@
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
     (if (and domain bucket)
       (str domain "/" bucket)
-      (throw (Exception. (str "Failed, cannot find cache domain for brand: " brand " and country: " country))))))
+      (comment throw (Exception. (str "Failed, cannot find cache domain for brand: " brand " and country: " country))))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
@@ -75,13 +75,9 @@
          route)))))
 
 (defn respond [brand country resource]
-  (try
-    (if-let [cache-domain (get-route brand country)]
+  (if-let [cache-domain (get-route brand country)]
       (response/redirect (str cache-domain "/" brand "/" country "/" resource))
-      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country)))
-    (catch Exception e
-      (trace/print-stack-trace e)
-      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country " exception: " e)))))
+      (response/not-found (str "Cannot locate cache domain for brand: " brand " and country: " country))))
 
 
 ; -------*** EXPOSE TO THE WEB
