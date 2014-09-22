@@ -54,7 +54,6 @@
 ;
 ; get data from REDIS or get data from Mongo
 ; and set the value into REDIS
-;
 
 (defn get-route [brand country]
   (if-let [cached-route (get-route-from-cache (str brand country))]
