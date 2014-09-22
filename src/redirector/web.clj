@@ -25,8 +25,7 @@
 
 (defn get-route-from-mongo [brand country]
   (let [{:keys [domain bucket]} (mongo-query {:brand brand :country country} [:domain :bucket])]
-    (if (and domain bucket)
-      (str domain "/" bucket))))
+    (and domain bucket (str domain "/" bucket))))
 
 ; -------*** REDIS HELPERS ... push out to another file
 ;
