@@ -1,35 +1,13 @@
 
-# clojure-getting-started
+# redirector
 
-A barebones Clojure app, which can easily be deployed to Heroku.  
+This is an example HTTP redirector for a client.
 
-This application support the [Getting Started with Clojure](https://devcenter.heroku.com/articles/getting-started-with-clojure) article - check it out.
+The client supplies a URL of the form http://service-name.herokuapp.com/BRAND/COUNTRY/resource.jpg
 
-## Running Locally
+The server re-writes the URL based on cached data in REDIS or, if not in REDIS, from MongoDB
 
-Make sure you have Clojure installed.  Also, install the [Heroku Toolbelt](https://toolbelt.heroku.com/).
+The new URL is returned via HTTP status code 302 (Found) with the Location header filled out to the new URL
 
-```sh
-$ git clone https://github.com/heroku/clojure-getting-started.git
-$ cd clojure-getting-started
-$ lein repl
-user=> (require 'clojure-getting-started.web)
-user=>(def server (clojure-getting-started.web/-main))
-```
-
-Your app should now be running on [localhost:5000](http://localhost:5000/).
-
-## Deploying to Heroku
-
-```sh
-$ heroku create
-$ git push heroku master
-$ heroku open
-```
-
-## Documentation
-
-For more information about using Clojure on Heroku, see these Dev Center articles:
-
-- [Clojure on Heroku](https://devcenter.heroku.com/categories/clojure)
+Any non-matches are returned with a status code 404 (Not Found)
 
