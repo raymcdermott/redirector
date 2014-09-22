@@ -14,7 +14,7 @@ Any non-matches are returned with a status code 404 (Not Found)
 If needed, the client should be programmed to follow these re-directs ;-)
 
 # Example 
-
+````
 $ curl -I http://redirects.herokuapp.com/XYZ/IT/abc.jpg
 HTTP/1.1 302 Found
 Connection: keep-alive
@@ -22,7 +22,7 @@ Date: Mon, 22 Sep 2014 08:57:40 GMT
 Location: https://s3-eu-west-1.amazonaws.com/cache-1/IT/abc.jpg
 Server: Jetty(7.x.y-SNAPSHOT)
 Via: 1.1 vegur
-
+````
 # Note
 This first implementation drops the first key from the new URL (this is how the first implementation needs it ...)
 
