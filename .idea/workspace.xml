@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="51c568c8-3049-4730-a69a-8a6cfb51b5b8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Leiningen__environ_1_0_0.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/project.clj" afterPath="$PROJECT_DIR$/project.clj" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/replstate.xml" afterPath="$PROJECT_DIR$/.idea/replstate.xml" />
-    </list>
+    <list default="true" id="51c568c8-3049-4730-a69a-8a6cfb51b5b8" name="Default" comment="" />
     <ignored path="redirector.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -30,8 +26,8 @@
       <file leaf-file-name="web.clj" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/redirector/web.clj">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.58426964" vertical-offset="0" max-vertical-offset="1521">
-              <caret line="44" column="131" selection-start-line="44" selection-start-column="39" selection-end-line="44" selection-end-column="39" />
+            <state vertical-scroll-proportion="0.5709908" vertical-offset="0" max-vertical-offset="1508">
+              <caret line="43" column="117" selection-start-line="43" selection-start-column="8" selection-end-line="43" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -338,7 +334,7 @@
       <created>1410869704817</created>
       <updated>1410869704817</updated>
       <workItem from="1410869706241" duration="26601000" />
-      <workItem from="1411133552874" duration="2183000" />
+      <workItem from="1411133552874" duration="2317000" />
     </task>
     <task id="LOCAL-00001" summary="mongo">
       <created>1410880670452</created>
@@ -364,11 +360,15 @@
       <created>1411376098008</created>
       <updated>1411376098008</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="use and properly (no if in sight) - found the last one :)">
+      <created>1411399421012</created>
+      <updated>1411399421012</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="28784000" />
+    <option name="totallyTimeSpent" value="28918000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
@@ -451,7 +451,8 @@
     <MESSAGE value="404 working properly now" />
     <MESSAGE value="do not include the brand in the route (by dictat of Wim)" />
     <MESSAGE value="use and properly (no if in sight)" />
-    <option name="LAST_COMMIT_MESSAGE" value="use and properly (no if in sight)" />
+    <MESSAGE value="use and properly (no if in sight) - found the last one :)" />
+    <option name="LAST_COMMIT_MESSAGE" value="use and properly (no if in sight) - found the last one :)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -520,8 +521,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/redirector/web.clj">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.58426964" vertical-offset="0" max-vertical-offset="1521">
-          <caret line="44" column="131" selection-start-line="44" selection-start-column="39" selection-end-line="44" selection-end-column="39" />
+        <state vertical-scroll-proportion="0.5709908" vertical-offset="0" max-vertical-offset="1508">
+          <caret line="43" column="117" selection-start-line="43" selection-start-column="8" selection-end-line="43" selection-end-column="8" />
           <folding />
         </state>
       </provider>
